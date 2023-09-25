@@ -1,0 +1,33 @@
+{
+  "name": "@gfay63/atlas-app-services-admin-api",
+  "version": "3.0",
+  "description": "OpenAPI client for Atlas App Services Admin API",
+  "author": "Greg Fay + OpenAPI-Generator Contributors",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gfay63/atlas-app-services-admin-api.git"
+  },
+  "keywords": [
+    "axios",
+    "typescript",
+    "openapi-client",
+    "openapi-generator",
+    "Atlas App Services Admin API"
+  ],
+  "license": "Unlicense",
+  "main": "./dist/index.js",
+  "typings": "./dist/index.d.ts",
+  "module": "./dist/esm/index.js",
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsc && tsc -p tsconfig.esm.json",
+    "prepare": "npm run build"
+  },
+  "dependencies": {
+    "axios": "^0.27.2"
+  },
+  "devDependencies": {
+    "@types/node": "^12.11.5",
+    "typescript": "^4.0"
+  }
+}
