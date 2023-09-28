@@ -1,10 +1,10 @@
 // atlas-app-services-client.ts
 
 import { get } from 'http';
-import * as API from './';
-import { AdminLoginRequest, Configuration, ConfigurationParameters } from './';
+import * as API from '.';
+import { AdminLoginRequest, Configuration, ConfigurationParameters } from '.';
 
-interface Logger {
+export interface Logger {
     log: (message: string, ...optionalParams: any[]) => void;
     error: (message: string, ...optionalParams: any[]) => void;
     debug: (message: string, ...optionalParams: any[]) => void;
@@ -30,7 +30,6 @@ class AppIdRetrievalError extends Error {
     }
 }
 
-//unauthorized user error
 class UnauthorizedException extends Error {
     constructor(message: string) {
         super(message);
@@ -42,7 +41,7 @@ class UnauthorizedException extends Error {
 export class AtlasAppServicesClient {
     private adminApi: API.AdminApi;
     private appsApi: API.AppsApi;
-    private groupId: string;
+    public groupId: string;
     private appId: string;
     private clientAppId: string;
     private userId: string;
@@ -73,8 +72,9 @@ export class AtlasAppServicesClient {
                 },
             },
         };
+        this.groupId = config.groupId;
+        //this.logger.debug(`Config Params: ${JSON.stringify(this.configParams, null, 2)}`);
     }
-
 
 
     async initialize() {
@@ -84,9 +84,6 @@ export class AtlasAppServicesClient {
     private async loginAndAppSetup() {
         try {
             const loginResponse = await this.doAdminLogin();
-
-            // Call the Apps API to Request the Application ID for the Atlas App Services project
-            //this.groupId = this.groupId
             this.appsApi = new API.AppsApi(new Configuration(this.configParams));
             const appsResponse = await this.appsApi.adminListApplications(this.groupId, "atlas");
             if (!appsResponse.data || !appsResponse.data[0] || !appsResponse.data[0]._id) {
@@ -99,33 +96,8 @@ export class AtlasAppServicesClient {
             this.clientAppId = appsResponse.data[0].client_app_id;
             this.groupId = appsResponse.data[0].group_id;
         } catch (error) {
-            if (error instanceof AppIdRetrievalError) {
-                // Handle AppIdRetrievalError specifically if needed
-            } else if (error.response) {
-                // The request was made and the server responded with a status code
-                // that falls out of the range of 2xx
-                this.logger.error(`Error Data: \n${JSON.stringify(error.response.data, null, 2)}`);
-                this.logger.error(`Error Status: ${error.response.status}`);
-                this.logger.error('Error Headers:\n', JSON.stringify(error.response.headers, null, 2));
-            } else if (error.request) {
-                // The request was made but no response was received
-                this.logger.error('No response received:', error.request);
-            } else {
-                // Something happened in setting up the request that triggered an Error
-                this.logger.error('Error', error.message);
-            }
-            // Re-throw the error or handle it as appropriate
             throw error;
         }
-        // log all the config parameters
-        this.logger.debug(`username: ${this.configParams.username}`);
-        this.logger.debug(`userId: ${this.userId}`);
-        this.logger.debug(`apiKey: ${this.configParams.apiKey}`);
-        this.logger.debug(`accessToken: ${this.accessToken.slice(0, 100)}`);
-        this.logger.debug(`refreshToken: ${this.refreshToken.slice(0, 100)}`);
-        this.logger.debug(`tokenExpiration: ${this.tokenExpiration}`);
-        this.logger.debug(`appId: ${this.appId}`);
-        this.logger.debug(`groupId: ${this.groupId}`);
     }
 
     private async doAdminLogin() {
@@ -233,15 +205,11 @@ export class AtlasAppServicesClient {
                 const origMethod = target[propKey as any];
                 if (typeof origMethod === 'function') {
                     return async (...args: any[]) => {
-                        // Log the API call
                         this.logger.debug(`Calling ${apiName}.${String(propKey)} with arguments:`, args);
                         try {
                             const result = await origMethod.apply(target, args);
-                            // Optionally, log the result
-                            //this.logger.debug(`Successfully called ${apiName}.${String(propKey)}`);
                             return result;
                         } catch (error) {
-                            // Log the error
                             this.logger.error(`Error calling ${apiName}.${String(propKey)}:`, error);
                             throw error;
                         }
