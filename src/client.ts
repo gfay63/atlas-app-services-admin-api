@@ -42,8 +42,8 @@ export class AtlasAppServicesClient {
     private adminApi: API.AdminApi;
     private appsApi: API.AppsApi;
     public groupId: string;
-    private appId: string;
-    private clientAppId: string;
+    public appId: string;
+    public clientAppId: string;
     private userId: string;
     private configParams: ConfigurationParameters;
     private accessToken: string;
@@ -154,37 +154,6 @@ export class AtlasAppServicesClient {
             await this.loginAndAppSetup(); // Re-login and re-initialize
         }
     }
-
-    // Getter method to access groupId
-    public getGroupId(): string {
-        return this.groupId;
-    }
-
-    // Getter method to access appId
-    public getAppId(): string {
-        return this.appId;
-    }
-
-    // Getter method to access userId
-    public getUserId(): string {
-        return this.userId;
-    }
-
-    // Getter method to access accessToken
-    public getAccessToken(): string {
-        return this.accessToken;
-    }
-
-    // Getter method to access refreshToken
-    public getRefreshToken(): string {
-        return this.refreshToken;
-    }
-
-    // Getter method to access tokenExpiration
-    public getTokenExpiration(): Date {
-        return this.tokenExpiration;
-    }
-
 
 
     /*** Getters for the APIs */
