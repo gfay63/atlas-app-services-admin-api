@@ -27,7 +27,7 @@
     "testthis": "npx ts-node ./src/testthis.ts"
   },
   "dependencies": {
-    "axios": "^0.27.2"
+    "axios": "^1.5.1"
   },
   "devDependencies": {
     "@types/dotenv": "^8.2.0",
