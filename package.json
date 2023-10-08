@@ -26,9 +26,6 @@
     "test": "jest",
     "testthis": "npx ts-node ./src/testthis.ts"
   },
-  "dependencies": {
-    "axios": "^1.5.1"
-  },
   "devDependencies": {
     "@types/dotenv": "^8.2.0",
     "@types/jest": "^29.5.5",
@@ -40,5 +37,8 @@
     "ts-node": "^10.9.1",
     "typedoc": "^0.25.1",
     "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "axios": "^1.4.0"
   }
 }
