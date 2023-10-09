@@ -158,7 +158,7 @@ export class AtlasAppServicesClient {
 
     /*** Getters for the APIs */
 
-    private async getApi(apiName: string): Promise<any> {
+    /* private async getApi(apiName: string): Promise<any> {
         await this.ensureValidAccessToken();
 
         // Always re-instantiate the API with the potentially updated configParams
@@ -193,129 +193,332 @@ export class AtlasAppServicesClient {
         this.apis[apiName] = proxy;
 
         return proxy;
+    } */
+    /*     private async instantiateAndLogApi(apiName: string): Promise<any> {
+            await this.ensureValidAccessToken();
+    
+            const ApiClass = (API as { [key: string]: any })[apiName];
+            if (typeof ApiClass !== 'function') {
+                throw new Error(`API ${apiName} does not exist`);
+            }
+            const apiInstance = new ApiClass(new API.Configuration(this.configParams));
+    
+            // Wrap each method with logging
+            for (const key in apiInstance) {
+                if (typeof apiInstance[key] === 'function') {
+                    const origMethod = apiInstance[key];
+                    apiInstance[key] = async (...args: any[]) => {
+                        this.logger.debug(`Calling ${apiName}.${String(key)} with arguments:`, args);
+                        try {
+                            const result = await origMethod.apply(apiInstance, args);
+                            return result;
+                        } catch (error) {
+                            this.logger.error(`Error calling ${apiName}.${String(key)}:`, error);
+                            throw error;
+                        }
+                    };
+                }
+            }
+    
+            return apiInstance;
+        } */
+
+    private instantiateApi(apiName: string): any {
+        const ApiClass = (API as { [key: string]: any })[apiName];
+        if (typeof ApiClass !== 'function') {
+            throw new Error(`API ${apiName} does not exist`);
+        }
+        return new ApiClass(new API.Configuration(this.configParams));
     }
 
+    private createApiProxy(apiInstance: any, apiName: string): any {
+        const handler: ProxyHandler<any> = {
+            get: (target, propKey: string | symbol, _receiver) => {
+                const origMethod = target[propKey as any];
+                if (typeof origMethod === 'function') {
+                    return async (...args: any[]) => {
+                        this.logger.debug(`Calling ${apiName}.${String(propKey)} with arguments:`, args);
+                        try {
+                            const result = await origMethod.apply(target, args);
+                            return result;
+                        } catch (error) {
+                            this.logger.error(`Error calling ${apiName}.${String(propKey)}:`, error);
+                            throw error;
+                        }
+                    };
+                } else {
+                    return origMethod;
+                }
+            },
+        };
+
+        return new Proxy(apiInstance, handler);
+    }
+
+
     async atlasAdminApi(): Promise<API.AdminApi> {
-        return await this.getApi('AdminApi');
+        const apiName = 'AdminApi';
+        const apiInstance = this.instantiateApi(apiName);
+        const proxy = this.createApiProxy(apiInstance, apiName);
+        this.apis[apiName] = proxy;
+        return proxy;
     }
 
     async atlasApikeysApi(): Promise<API.ApikeysApi> {
-        return await this.getApi('ApikeysApi');
+        const apiName = 'ApikeysApi';
+        const apiInstance = this.instantiateApi(apiName);
+        const proxy = this.createApiProxy(apiInstance, apiName);
+        this.apis[apiName] = proxy;
+        return proxy;
     }
 
     async atlasAppsApi(): Promise<API.AppsApi> {
-        return await this.getApi('AppsApi');
+        const apiName = 'AppsApi';
+        const apiInstance = this.instantiateApi(apiName);
+        const proxy = this.createApiProxy(apiInstance, apiName);
+        this.apis[apiName] = proxy;
+        return proxy;
     }
 
     async atlasAuthprovidersApi(): Promise<API.AuthprovidersApi> {
-        return await this.getApi('AuthprovidersApi');
+        const apiName = 'AuthprovidersApi';
+        const apiInstance = this.instantiateApi(apiName);
+        const proxy = this.createApiProxy(apiInstance, apiName);
+        this.apis[apiName] = proxy;
+        return proxy;
     }
 
     async atlasBillingApi(): Promise<API.BillingApi> {
-        return await this.getApi('BillingApi');
+        const apiName = 'BillingApi';
+        const apiInstance = this.instantiateApi(apiName);
+        const proxy = this.createApiProxy(apiInstance, apiName);
+        this.apis[apiName] = proxy;
+        return proxy;
     }
 
     async atlasCustomUserDataApi(): Promise<API.CustomUserDataApi> {
-        return await this.getApi('CustomUserDataApi');
+        const apiName = 'CustomUserDataApi';
+        const apiInstance = this.instantiateApi(apiName);
+        const proxy = this.createApiProxy(apiInstance, apiName);
+        this.apis[apiName] = proxy;
+        return proxy;
     }
 
     async atlasDataApiApi(): Promise<API.DataApiApi> {
-        return await this.getApi('DataApiApi');
+        const apiName = 'DataApiApi';
+        const apiInstance = this.instantiateApi(apiName);
+        const proxy = this.createApiProxy(apiInstance, apiName);
+        this.apis[apiName] = proxy;
+        return proxy;
     }
 
     async atlasDependenciesApi(): Promise<API.DependenciesApi> {
-        return await this.getApi('DependenciesApi');
+        const apiName = 'DependenciesApi';
+        const apiInstance = this.instantiateApi(apiName);
+        const proxy = this.createApiProxy(apiInstance, apiName);
+        this.apis[apiName] = proxy;
+        return proxy;
     }
 
     async atlasDeployApi(): Promise<API.DeployApi> {
-        return await this.getApi('DeployApi');
+        const apiName = 'DeployApi';
+        const apiInstance = this.instantiateApi(apiName);
+        const proxy = this.createApiProxy(apiInstance, apiName);
+        this.apis[apiName] = proxy;
+        return proxy;
     }
 
     async atlasEmailApi(): Promise<API.EmailApi> {
-        return await this.getApi('EmailApi');
+        const apiName = 'EmailApi';
+        const apiInstance = this.instantiateApi(apiName);
+        const proxy = this.createApiProxy(apiInstance, apiName);
+        this.apis[apiName] = proxy;
+        return proxy;
     }
 
     async atlasEndpointsApi(): Promise<API.EndpointsApi> {
-        return await this.getApi('EndpointsApi');
+        const apiName = 'EndpointsApi';
+        const apiInstance = this.instantiateApi(apiName);
+        const proxy = this.createApiProxy(apiInstance, apiName);
+        this.apis[apiName] = proxy;
+        return proxy;
     }
+
 
     async atlasEnvironmentsApi(): Promise<API.EnvironmentsApi> {
-        return await this.getApi('EnvironmentsApi');
+        const apiName = 'EnvironmentsApi';
+        const apiInstance = this.instantiateApi(apiName);
+        const proxy = this.createApiProxy(apiInstance, apiName);
+        this.apis[apiName] = proxy;
+        return proxy;
     }
+
 
     async atlasEventSubscriptionsApi(): Promise<API.EventSubscriptionsApi> {
-        return await this.getApi('EventSubscriptionsApi');
+        const apiName = 'EventSubscriptionsApi';
+        const apiInstance = this.instantiateApi(apiName);
+        const proxy = this.createApiProxy(apiInstance, apiName);
+        this.apis[apiName] = proxy;
+        return proxy;
     }
+
 
     async atlasFunctionsApi(): Promise<API.FunctionsApi> {
-        return await this.getApi('FunctionsApi');
+        const apiName = 'FunctionsApi';
+        const apiInstance = this.instantiateApi(apiName);
+        const proxy = this.createApiProxy(apiInstance, apiName);
+        this.apis[apiName] = proxy;
+        return proxy;
     }
+
 
     async atlasGraphqlApi(): Promise<API.GraphqlApi> {
-        return await this.getApi('GraphqlApi');
+        const apiName = 'GraphqlApi';
+        const apiInstance = this.instantiateApi(apiName);
+        const proxy = this.createApiProxy(apiInstance, apiName);
+        this.apis[apiName] = proxy;
+        return proxy;
     }
+
 
     async atlasHostingApi(): Promise<API.HostingApi> {
-        return await this.getApi('HostingApi');
+        const apiName = 'HostingApi';
+        const apiInstance = this.instantiateApi(apiName);
+        const proxy = this.createApiProxy(apiInstance, apiName);
+        this.apis[apiName] = proxy;
+        return proxy;
     }
+
 
     async atlasLogForwardersApi(): Promise<API.LogForwardersApi> {
-        return await this.getApi('LogForwardersApi');
+        const apiName = 'LogForwardersApi';
+        const apiInstance = this.instantiateApi(apiName);
+        const proxy = this.createApiProxy(apiInstance, apiName);
+        this.apis[apiName] = proxy;
+        return proxy;
     }
+
 
     async atlasLogsApi(): Promise<API.LogsApi> {
-        return await this.getApi('LogsApi');
+        const apiName = 'LogsApi';
+        const apiInstance = this.instantiateApi(apiName);
+        const proxy = this.createApiProxy(apiInstance, apiName);
+        this.apis[apiName] = proxy;
+        return proxy;
     }
+
 
     async atlasMetricsApi(): Promise<API.MetricsApi> {
-        return await this.getApi('MetricsApi');
+        const apiName = 'MetricsApi';
+        const apiInstance = this.instantiateApi(apiName);
+        const proxy = this.createApiProxy(apiInstance, apiName);
+        this.apis[apiName] = proxy;
+        return proxy;
     }
+
 
     async atlasNotificationsApi(): Promise<API.NotificationsApi> {
-        return await this.getApi('NotificationsApi');
+        const apiName = 'NotificationsApi';
+        const apiInstance = this.instantiateApi(apiName);
+        const proxy = this.createApiProxy(apiInstance, apiName);
+        this.apis[apiName] = proxy;
+        return proxy;
     }
+
 
     async atlasRulesApi(): Promise<API.RulesApi> {
-        return await this.getApi('RulesApi');
+        const apiName = 'RulesApi';
+        const apiInstance = this.instantiateApi(apiName);
+        const proxy = this.createApiProxy(apiInstance, apiName);
+        this.apis[apiName] = proxy;
+        return proxy;
     }
+
 
     async atlasSchemasApi(): Promise<API.SchemasApi> {
-        return await this.getApi('SchemasApi');
+        const apiName = 'SchemasApi';
+        const apiInstance = this.instantiateApi(apiName);
+        const proxy = this.createApiProxy(apiInstance, apiName);
+        this.apis[apiName] = proxy;
+        return proxy;
     }
+
 
     async atlasSecretsApi(): Promise<API.SecretsApi> {
-        return await this.getApi('SecretsApi');
+        const apiName = 'SecretsApi';
+        const apiInstance = this.instantiateApi(apiName);
+        const proxy = this.createApiProxy(apiInstance, apiName);
+        this.apis[apiName] = proxy;
+        return proxy;
     }
+
 
     async atlasSecurityApi(): Promise<API.SecurityApi> {
-        return await this.getApi('SecurityApi');
+        const apiName = 'SecurityApi';
+        const apiInstance = this.instantiateApi(apiName);
+        const proxy = this.createApiProxy(apiInstance, apiName);
+        this.apis[apiName] = proxy;
+        return proxy;
     }
+
 
     async atlasServicesApi(): Promise<API.ServicesApi> {
-        return await this.getApi('ServicesApi');
+        const apiName = 'ServicesApi';
+        const apiInstance = this.instantiateApi(apiName);
+        const proxy = this.createApiProxy(apiInstance, apiName);
+        this.apis[apiName] = proxy;
+        return proxy;
     }
+
 
     async atlasSyncApi(): Promise<API.SyncApi> {
-        return await this.getApi('SyncApi');
+        const apiName = 'SyncApi';
+        const apiInstance = this.instantiateApi(apiName);
+        const proxy = this.createApiProxy(apiInstance, apiName);
+        this.apis[apiName] = proxy;
+        return proxy;
     }
+
 
     async atlasTriggersApi(): Promise<API.TriggersApi> {
-        return await this.getApi('TriggersApi');
+        const apiName = 'TriggersApi';
+        const apiInstance = this.instantiateApi(apiName);
+        const proxy = this.createApiProxy(apiInstance, apiName);
+        this.apis[apiName] = proxy;
+        return proxy;
     }
+
 
     async atlasUsersApi(): Promise<API.UsersApi> {
-        return await this.getApi('UsersApi');
+        const apiName = 'UsersApi';
+        const apiInstance = this.instantiateApi(apiName);
+        const proxy = this.createApiProxy(apiInstance, apiName);
+        this.apis[apiName] = proxy;
+        return proxy;
     }
+
 
     async atlasValuesApi(): Promise<API.ValuesApi> {
-        return await this.getApi('ValuesApi');
+        const apiName = 'ValuesApi';
+        const apiInstance = this.instantiateApi(apiName);
+        const proxy = this.createApiProxy(apiInstance, apiName);
+        this.apis[apiName] = proxy;
+        return proxy;
     }
+
 
     async atlasWebhooksApi(): Promise<API.WebhooksApi> {
-        return await this.getApi('WebhooksApi');
+        const apiName = 'WebhooksApi';
+        const apiInstance = this.instantiateApi(apiName);
+        const proxy = this.createApiProxy(apiInstance, apiName);
+        this.apis[apiName] = proxy;
+        return proxy;
     }
 
+
 }
+
+
 
 export const getClient = (config: {
     publicKey: string,
