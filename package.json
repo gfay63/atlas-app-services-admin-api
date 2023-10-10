@@ -1,6 +1,6 @@
 {
   "name": "@gfay63/atlas-app-services-admin-api",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "description": "OpenAPI client for Atlas App Services Admin API",
   "author": "Greg Fay + OpenAPI-Generator Contributors",
   "repository": {
@@ -22,8 +22,7 @@
     "build": "tsc && tsc -p tsconfig.esm.json",
     "prepare": "npm run build",
     "docs": "typedoc --out docs src/*.ts",
-    "test": "jest --detectOpenHandles",
-    "testthis": "npx ts-node ./src/testthis.ts"
+    "test": "jest --detectOpenHandles"
   },
   "devDependencies": {
     "@types/dotenv": "^8.2.0",
