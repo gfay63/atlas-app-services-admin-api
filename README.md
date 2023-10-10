@@ -43,7 +43,7 @@ class ConsoleLogger {
 
 exports = async function(arg){
   const logger = new ConsoleLogger(); 
-  const { getClient, AtlasAppServicesClient, AtlasAppServicesAdminService } = require('atlas-app-services-admin-api');
+  const { AtlasAppServicesClient } = require('atlas-app-services-admin-api');
   try {
     const configInfo = {
         publicKey: process.env.ATLAS_APP_SERVICES_PUBLIC_KEY,
