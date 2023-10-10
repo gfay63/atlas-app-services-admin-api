@@ -4,9 +4,9 @@ Welcome to the comprehensive interface for the [MongoDB Atlas App Services Admin
 
 This package is derived directly from the official open API specification [here](blob:https://www.mongodb.com/78fd1eaa-8b75-4f59-b462-043187294fd5). It's been refactored and optimized to provide a seamless and efficient experience.
 
-## 🚨 Disclaimer
-
-While this package provides comprehensive access to the MongoDB Atlas App Services Admin API, due to the vastness and complexity of the APIs, not all use cases have been exhaustively tested or verified. Users are encouraged to test the package in their specific contexts and report any issues they encounter. Contributions and feedback are always welcome!
+> 🚨 Disclaimer
+>
+> While this package provides comprehensive access to the MongoDB Atlas App Services Admin API, due to the vastness and complexity of the APIs, not all use cases have been exhaustively tested or verified. Users are encouraged to test the package in their specific contexts and report any issues they encounter. Contributions and feedback are always welcome!
 
 ## 🌟 Why Use This?
 
@@ -83,7 +83,7 @@ Your insights and contributions can make this package even better! Check out our
 
 ## 📖 Documentation
 
-Our library's documentation is generated using TypeDoc, ensuring that you get the most accurate and up-to-date information directly from the source code.
+Our [library's documentation](https://gfay63.github.io/atlas-app-services-admin-api/) is generated using TypeDoc, ensuring that you get the most accurate and up-to-date information directly from the source code.
 
 Happy coding! 🎉
 
