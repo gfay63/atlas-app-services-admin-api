@@ -5,7 +5,7 @@
   "author": "Greg Fay + OpenAPI-Generator Contributors",
   "repository": {
     "type": "git",
-    "url": "https://github.com/gfay63/atlas-app-services-admin-api.git"
+    "url": "git+https://github.com/gfay63/atlas-app-services-admin-api.git"
   },
   "keywords": [
     "mongodb",
