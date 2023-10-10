@@ -22,7 +22,7 @@
   "scripts": {
     "build": "tsc && tsc -p tsconfig.esm.json",
     "prepare": "npm run build",
-    "docs": "typedoc --out docs .",
+    "docs": "typedoc --out docs ./src",
     "test": "jest --detectOpenHandles",
     "testthis": "npx ts-node ./src/testthis.ts"
   },
