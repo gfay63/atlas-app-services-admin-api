@@ -1,6 +1,6 @@
 {
   "name": "atlas-app-services-admin-api",
-  "version": "1.5.0",
+  "version": "1.5.0+1",
   "description": "OpenAPI client for Atlas App Services Admin API",
   "author": "Greg Fay + OpenAPI-Generator Contributors",
   "repository": {
