@@ -12,6 +12,7 @@ This package is derived directly from the official open API specification [here]
 
 - **Full Coverage**: This package offers complete access to the MongoDB Atlas App Services Admin API. No more partial implementations or missing features.
 - **Optimized for Use**: The refactoring ensures that accessing and using the API is as intuitive and straightforward as possible.
+- **Full documentation**: See [full documentation of the API Specification](https://gfay63.github.io/atlas-app-services-admin-api/).
 
 ## 🛠 Installation
 
@@ -21,7 +22,7 @@ npm install atlas-app-services-admin-api --save
 
 ## 🚀 Getting Started
 
-To begin, you'll need your Public and Private keys, as well as your groupId (identical to your Project Id). Get them [here](https://www.mongodb.com/docs/atlas/app-services/admin/api/v3/).
+To begin, you'll need your Public and Private keys, as well as your groupId (identical to your Project Id). See how to get them [here](https://www.mongodb.com/docs/atlas/app-services/admin/api/v3/).
 
 The default BaseUrl is `https://realm.mongodb.com/api/admin/v3.0`.
 
