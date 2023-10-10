@@ -1,6 +1,12 @@
+// Copyright (c) 2023 Gregory Fay
+// This software is licensed under the MIT License.
+
 import * as API from '.';
 import { AdminLoginRequest, Configuration, ConfigurationParameters } from '.';
 
+/**
+ * Logger interface for custom logging.
+ */
 export interface Logger {
     log: (message: string, ...optionalParams: any[]) => void;
     error: (message: string, ...optionalParams: any[]) => void;
@@ -8,18 +14,18 @@ export interface Logger {
     // ... other log levels as needed
 }
 
+/**
+ * No operation logger for default logging.
+ */
 class NoOpLogger implements Logger {
-    log(message: string, ...optionalParams: any[]): void {
-        // Do nothing
-    }
-    error(message: string, ...optionalParams: any[]): void {
-        // Do nothing
-    }
-    debug(message: string, ...optionalParams: any[]): void {
-        // Do nothing
-    }
+    log(message: string, ...optionalParams: any[]): void { }
+    error(message: string, ...optionalParams: any[]): void { }
+    debug(message: string, ...optionalParams: any[]): void { }
 }
 
+/**
+ * Custom error for App ID retrieval failures.
+ */
 class AppIdRetrievalError extends Error {
     constructor(message: string) {
         super(message);
@@ -27,6 +33,9 @@ class AppIdRetrievalError extends Error {
     }
 }
 
+/**
+ * Custom error for unauthorized access.
+ */
 class UnauthorizedException extends Error {
     constructor(message: string) {
         super(message);
@@ -34,7 +43,9 @@ class UnauthorizedException extends Error {
     }
 }
 
-
+/**
+ * AtlasAppServicesClient class for interacting with Atlas App Services.
+ */
 export class AtlasAppServicesClient {
     private adminApi: API.AdminApi;
     private appsApi: API.AppsApi;
@@ -49,6 +60,11 @@ export class AtlasAppServicesClient {
     private logger: Logger;
     private apis: { [key: string]: any } = {}; // Cache of instantiated APIs
 
+    /**
+     * Constructor for AtlasAppServicesClient.
+     * @param config - Configuration object containing publicKey, privateKey, baseUrl, and groupId.
+     * @param logger - Optional logger for custom logging.
+     */
     constructor(
         config: {
             publicKey: string,
@@ -70,9 +86,11 @@ export class AtlasAppServicesClient {
             },
         };
         this.groupId = config.groupId;
-        //this.logger.debug(`Config Params: ${JSON.stringify(this.configParams, null, 2)}`);
     }
 
+    /**
+     * Initialize the client by logging in and setting up the app.
+     */
     async initialize() {
         await this.loginAndAppSetup();
     }
@@ -84,9 +102,7 @@ export class AtlasAppServicesClient {
             const appsResponse = await this.appsApi.adminListApplications(this.groupId, "atlas");
             if (!appsResponse.data || !appsResponse.data[0] || !appsResponse.data[0]._id) {
                 this.logger.error(`Failed to get appID App Services Admin API: ${JSON.stringify(appsResponse.data, null, 2)}`);
-                const errorMessage = 'Failed to retrieve appID from App Services Admin API.';
-                console.error(errorMessage, JSON.stringify(appsResponse.data, null, 2));
-                throw new AppIdRetrievalError(errorMessage);
+                throw new AppIdRetrievalError('Failed to retrieve appID from App Services Admin API.');
             }
             this.appId = appsResponse.data[0]._id;
             this.clientAppId = appsResponse.data[0].client_app_id;
@@ -105,16 +121,13 @@ export class AtlasAppServicesClient {
         const loginResponse = await this.adminApi.adminLogin("mongodb-cloud", adminLoginRequest);
         if (!loginResponse.data || !loginResponse.data.access_token || !loginResponse.data.refresh_token) {
             throw new UnauthorizedException('Failed to Login to Atlas App Services Admin API');
-        };
-        // Assign the access tokens and refresh interval
+        }
         this.setAccessToken(loginResponse.data.access_token);
         this.refreshToken = loginResponse.data.refresh_token;
         this.userId = loginResponse.data.user_id;
         this.logger.log('Successfully completed login to Atlas App Services Admin API');
         return loginResponse;
     }
-
-    /*** Token Management */
 
     private setAccessToken(token: string) {
         this.tokenExpiration = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes from now
@@ -133,7 +146,6 @@ export class AtlasAppServicesClient {
         if (this.isAccessTokenValid()) {
             return;
         }
-        // Attempt to refresh the access token with the refresh token
         this.configParams.accessToken = this.refreshToken;
         this.adminApi = new API.AdminApi(new Configuration(this.configParams));
         try {
@@ -151,181 +163,291 @@ export class AtlasAppServicesClient {
         }
     }
 
-
-    /*** Getters for the APIs */
-
     private async instantiateApi(apiName: string): Promise<any> {
         await this.ensureValidAccessToken();
         const ApiClass = (API as { [key: string]: any })[apiName];
         if (typeof ApiClass !== 'function') {
             throw new Error(`API ${apiName} does not exist`);
         }
-        return new ApiClass(new API.Configuration(this.configParams));
+
+        const apiInstance = new ApiClass(new API.Configuration(this.configParams));
+        return new Proxy(apiInstance, this.createApiProxyHandler());
     }
 
+    private createApiProxyHandler(): ProxyHandler<any> {
+        return {
+            get: (target, propKey, receiver) => {
+                const origMethod = target[propKey];
+                if (typeof origMethod === 'function') {
+                    return (...args: any[]) => {
+                        this.logger.log(`Calling method: '${String(propKey)}' with arguments: ${this.stringifyArgs(args)}`);
+                        return origMethod.apply(target, args);
+                    };
+                } else {
+                    return origMethod;
+                }
+            }
+        };
+    }
+
+    private stringifyArgs(args: any[], depth: number = 2): string {
+        const cache: any[] = [];
+        return JSON.stringify(args, (key, value) => {
+            if (typeof value === 'object' && value !== null) {
+                if (cache.indexOf(value) !== -1) {
+                    // Circular reference found, discard key
+                    return;
+                }
+                // Store value in our collection
+                cache.push(value);
+            }
+            return value;
+        }, depth);
+    }
+
+    /*** Getters for the APIs */
+
+    /*** Getters for the APIs */
+
+    /**
+     * Get an instance of the Admin API.
+     * @returns {Promise<API.AdminApi>} An instance of the Admin API.
+     */
     async atlasAdminApi(): Promise<API.AdminApi> {
-        const apiName = 'AdminApi';
-        return await this.instantiateApi(apiName);
+        return await this.instantiateApi('AdminApi');
     }
 
+    /**
+     * Get an instance of the API Keys API.
+     * @returns {Promise<API.ApikeysApi>} An instance of the API Keys API.
+     */
     async atlasApikeysApi(): Promise<API.ApikeysApi> {
-        const apiName = 'ApikeysApi';
-        return await this.instantiateApi(apiName);
+        return await this.instantiateApi('ApikeysApi');
     }
 
+    /**
+     * Get an instance of the Apps API.
+     * @returns {Promise<API.AppsApi>} An instance of the Apps API.
+     */
     async atlasAppsApi(): Promise<API.AppsApi> {
-        const apiName = 'AppsApi';
-        return await this.instantiateApi(apiName);
-        //const proxy = this.createApiProxy(apiInstance, apiName);
-        //this.apis[apiName] = proxy;
-        //return proxy;
+        return await this.instantiateApi('AppsApi');
     }
 
+    /**
+     * Get an instance of the Auth Providers API.
+     * @returns {Promise<API.AuthprovidersApi>} An instance of the Auth Providers API.
+     */
     async atlasAuthprovidersApi(): Promise<API.AuthprovidersApi> {
-        const apiName = 'AuthprovidersApi';
-        return await this.instantiateApi(apiName);
+        return await this.instantiateApi('AuthprovidersApi');
     }
 
+    /**
+     * Get an instance of the Billing API.
+     * @returns {Promise<API.BillingApi>} An instance of the Billing API.
+     */
     async atlasBillingApi(): Promise<API.BillingApi> {
-        const apiName = 'BillingApi';
-        return await this.instantiateApi(apiName);
+        return await this.instantiateApi('BillingApi');
     }
 
+    /**
+     * Get an instance of the Custom User Data API.
+     * @returns {Promise<API.CustomUserDataApi>} An instance of the Custom User Data API.
+     */
     async atlasCustomUserDataApi(): Promise<API.CustomUserDataApi> {
-        const apiName = 'CustomUserDataApi';
-        return await this.instantiateApi(apiName);
+        return await this.instantiateApi('CustomUserDataApi');
     }
 
+    /**
+     * Get an instance of the Data API.
+     * @returns {Promise<API.DataApiApi>} An instance of the Data API.
+     */
     async atlasDataApiApi(): Promise<API.DataApiApi> {
-        const apiName = 'DataApiApi';
-        return await this.instantiateApi(apiName);
+        return await this.instantiateApi('DataApiApi');
     }
 
+    /**
+     * Get an instance of the Dependencies API.
+     * @returns {Promise<API.DependenciesApi>} An instance of the Dependencies API.
+     */
     async atlasDependenciesApi(): Promise<API.DependenciesApi> {
-        const apiName = 'DependenciesApi';
-        return await this.instantiateApi(apiName);
+        return await this.instantiateApi('DependenciesApi');
     }
 
+    /**
+     * Get an instance of the Deploy API.
+     * @returns {Promise<API.DeployApi>} An instance of the Deploy API.
+     */
     async atlasDeployApi(): Promise<API.DeployApi> {
-        const apiName = 'DeployApi';
-        return await this.instantiateApi(apiName);
+        return await this.instantiateApi('DeployApi');
     }
 
+    /**
+     * Get an instance of the Email API.
+     * @returns {Promise<API.EmailApi>} An instance of the Email API.
+     */
     async atlasEmailApi(): Promise<API.EmailApi> {
-        const apiName = 'EmailApi';
-        return await this.instantiateApi(apiName);
+        return await this.instantiateApi('EmailApi');
     }
 
+    /**
+     * Get an instance of the Endpoints API.
+     * @returns {Promise<API.EndpointsApi>} An instance of the Endpoints API.
+     */
     async atlasEndpointsApi(): Promise<API.EndpointsApi> {
-        const apiName = 'EndpointsApi';
-        return await this.instantiateApi(apiName);
+        return await this.instantiateApi('EndpointsApi');
     }
 
+    /**
+     * Get an instance of the Environments API.
+     * @returns {Promise<API.EnvironmentsApi>} An instance of the Environments API.
+     */
     async atlasEnvironmentsApi(): Promise<API.EnvironmentsApi> {
-        const apiName = 'EnvironmentsApi';
-        return await this.instantiateApi(apiName);
+        return await this.instantiateApi('EnvironmentsApi');
     }
 
+    /**
+     * Get an instance of the Event Subscriptions API.
+     * @returns {Promise<API.EventSubscriptionsApi>} An instance of the Event Subscriptions API.
+     */
     async atlasEventSubscriptionsApi(): Promise<API.EventSubscriptionsApi> {
-        const apiName = 'EventSubscriptionsApi';
-        return await this.instantiateApi(apiName);
+        return await this.instantiateApi('EventSubscriptionsApi');
     }
 
+    /**
+     * Get an instance of the Functions API.
+     * @returns {Promise<API.FunctionsApi>} An instance of the Functions API.
+     */
     async atlasFunctionsApi(): Promise<API.FunctionsApi> {
-        const apiName = 'FunctionsApi';
-        return await this.instantiateApi(apiName);
+        return await this.instantiateApi('FunctionsApi');
     }
 
+    /**
+     * Get an instance of the GraphQL API.
+     * @returns {Promise<API.GraphqlApi>} An instance of the GraphQL API.
+     */
     async atlasGraphqlApi(): Promise<API.GraphqlApi> {
-        const apiName = 'GraphqlApi';
-        return await this.instantiateApi(apiName);
+        return await this.instantiateApi('GraphqlApi');
     }
 
+    /**
+     * Get an instance of the Hosting API.
+     * @returns {Promise<API.HostingApi>} An instance of the Hosting API.
+     */
     async atlasHostingApi(): Promise<API.HostingApi> {
-        const apiName = 'HostingApi';
-        return await this.instantiateApi(apiName);
+        return await this.instantiateApi('HostingApi');
     }
 
+    /**
+     * Get an instance of the Log Forwarders API.
+     * @returns {Promise<API.LogForwardersApi>} An instance of the Log Forwarders API.
+     */
     async atlasLogForwardersApi(): Promise<API.LogForwardersApi> {
-        const apiName = 'LogForwardersApi';
-        return await this.instantiateApi(apiName);
+        return await this.instantiateApi('LogForwardersApi');
     }
 
+    /**
+     * Get an instance of the Logs API.
+     * @returns {Promise<API.LogsApi>} An instance of the Logs API.
+     */
     async atlasLogsApi(): Promise<API.LogsApi> {
-        const apiName = 'LogsApi';
-        return await this.instantiateApi(apiName);
+        return await this.instantiateApi('LogsApi');
     }
 
+    /**
+     * Get an instance of the Metrics API.
+     * @returns {Promise<API.MetricsApi>} An instance of the Metrics API.
+     */
     async atlasMetricsApi(): Promise<API.MetricsApi> {
-        const apiName = 'MetricsApi';
-        return await this.instantiateApi(apiName);
+        return await this.instantiateApi('MetricsApi');
     }
 
+    /**
+     * Get an instance of the Notifications API.
+     * @returns {Promise<API.NotificationsApi>} An instance of the Notifications API.
+     */
     async atlasNotificationsApi(): Promise<API.NotificationsApi> {
-        const apiName = 'NotificationsApi';
-        return await this.instantiateApi(apiName);
+        return await this.instantiateApi('NotificationsApi');
     }
 
+    /**
+     * Get an instance of the Rules API.
+     * @returns {Promise<API.RulesApi>} An instance of the Rules API.
+     */
     async atlasRulesApi(): Promise<API.RulesApi> {
-        const apiName = 'RulesApi';
-        return await this.instantiateApi(apiName);
+        return await this.instantiateApi('RulesApi');
     }
 
+    /**
+     * Get an instance of the Schemas API.
+     * @returns {Promise<API.SchemasApi>} An instance of the Schemas API.
+     */
     async atlasSchemasApi(): Promise<API.SchemasApi> {
-        const apiName = 'SchemasApi';
-        return await this.instantiateApi(apiName);
+        return await this.instantiateApi('SchemasApi');
     }
 
+    /**
+     * Get an instance of the Secrets API.
+     * @returns {Promise<API.SecretsApi>} An instance of the Secrets API.
+     */
     async atlasSecretsApi(): Promise<API.SecretsApi> {
-        const apiName = 'SecretsApi';
-        return await this.instantiateApi(apiName);
+        return await this.instantiateApi('SecretsApi');
     }
 
+    /**
+     * Get an instance of the Security API.
+     * @returns {Promise<API.SecurityApi>} An instance of the Security API.
+     */
     async atlasSecurityApi(): Promise<API.SecurityApi> {
-        const apiName = 'SecurityApi';
-        return await this.instantiateApi(apiName);
+        return await this.instantiateApi('SecurityApi');
     }
 
+    /**
+     * Get an instance of the Services API.
+     * @returns {Promise<API.ServicesApi>} An instance of the Services API.
+     */
     async atlasServicesApi(): Promise<API.ServicesApi> {
-        const apiName = 'ServicesApi';
-        return await this.instantiateApi(apiName);
+        return await this.instantiateApi('ServicesApi');
     }
 
+    /**
+     * Get an instance of the Sync API.
+     * @returns {Promise<API.SyncApi>} An instance of the Sync API.
+     */
     async atlasSyncApi(): Promise<API.SyncApi> {
-        const apiName = 'SyncApi';
-        return await this.instantiateApi(apiName);
+        return await this.instantiateApi('SyncApi');
     }
 
+    /**
+     * Get an instance of the Triggers API.
+     * @returns {Promise<API.TriggersApi>} An instance of the Triggers API.
+     */
     async atlasTriggersApi(): Promise<API.TriggersApi> {
-        const apiName = 'TriggersApi';
-        return await this.instantiateApi(apiName);
+        return await this.instantiateApi('TriggersApi');
     }
 
+    /**
+     * Get an instance of the Users API.
+     * @returns {Promise<API.UsersApi>} An instance of the Users API.
+     */
     async atlasUsersApi(): Promise<API.UsersApi> {
-        const apiName = 'UsersApi';
-        return await this.instantiateApi(apiName);
+        return await this.instantiateApi('UsersApi');
     }
 
+    /**
+     * Get an instance of the Values API.
+     * @returns {Promise<API.ValuesApi>} An instance of the Values API.
+     */
     async atlasValuesApi(): Promise<API.ValuesApi> {
-        const apiName = 'ValuesApi';
-        return await this.instantiateApi(apiName);
+        return await this.instantiateApi('ValuesApi');
     }
 
+    /**
+     * Get an instance of the Webhooks API.
+     * @returns {Promise<API.WebhooksApi>} An instance of the Webhooks API.
+     */
     async atlasWebhooksApi(): Promise<API.WebhooksApi> {
-        const apiName = 'WebhooksApi';
-        return await this.instantiateApi(apiName);
+        return await this.instantiateApi('WebhooksApi');
     }
 
 }
 
-
-
-export const getClient = (config: {
-    publicKey: string,
-    privateKey: string,
-    baseUrl: string,
-    groupId: string,
-}): AtlasAppServicesClient => {
-    const client = new AtlasAppServicesClient(config);
-    return client;
-};
