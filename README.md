@@ -28,7 +28,7 @@ The default BaseUrl is `https://realm.mongodb.com/api/admin/v3.0`.
 Here's a quick example to retrieve the list of Triggers:
 
 ```javascript
-// If you don't have a logger, you can map the console:
+// Logging is optional. Use any logger! If you don't have one, you can map the console:
 class ConsoleLogger {
     log(message, ...optionalParams) {
         console.log(`**** ConsoleLogger-LOG: ${message}`, ...optionalParams);
@@ -41,31 +41,30 @@ class ConsoleLogger {
     }
 }
 
-exports = async function(arg){
-  const logger = new ConsoleLogger(); 
-  const { AtlasAppServicesClient } = require('atlas-app-services-admin-api');
-  try {
-    const configInfo = {
-        publicKey: process.env.ATLAS_APP_SERVICES_PUBLIC_KEY,
-        privateKey: process.env.ATLAS_APP_SERVICES_PRIVATE_KEY,
-        groupId: process.env.ATLAS_APP_SERVICES_GROUP_ID,
-        baseUrl: process.env.ATLAS_APP_SERVICES_BASE_URL, // Optional Override
-    };
-    const atlasClient = new AtlasAppServicesClient(configInfo, logger);
-    await atlasClient.initialize();
-    const groupId = atlasClient.groupId;
-    const appId = atlasClient.appId;
-    const triggersApi = await atlasClient.atlasTriggersApi();
-    const apiResponse = await triggersApi.adminListTriggers(groupId, appId);
-    if (apiResponse.status !== 200 && apiResponse.data) {
-        throw new HttpException(apiResponse.data, apiResponse.status);
-    }
-    return { result: apiResponse.data };
-  } catch(err) {
-    console.log("Error occurred while executing test:", err.message);
-    return { error: err.message };
-  }
+const { AtlasAppServicesClient } = require('atlas-app-services-admin-api');
+// Setup optional logging
+const logger = new ConsoleLogger();
+// Setup your Atlas config per docs
+const configInfo = {
+    publicKey: process.env.ATLAS_APP_SERVICES_PUBLIC_KEY,
+    privateKey: process.env.ATLAS_APP_SERVICES_PRIVATE_KEY,
+    groupId: process.env.ATLAS_APP_SERVICES_GROUP_ID,
+    baseUrl: process.env.ATLAS_APP_SERVICES_BASE_URL, // Optional Override
 };
+// Instantiate and initialize the client
+const atlasClient = new AtlasAppServicesClient(configInfo, logger);
+await atlasClient.initialize();
+// Instantiate the specific Atlas API you would like (see docs)
+const triggersApi = await atlasClient.atlasTriggersApi();
+// Snag Ids from client for the API calls as needed
+const groupId = atlasClient.groupId;
+const appId = atlasClient.appId;
+// Make the API call
+const apiResponse = await triggersApi.adminListTriggers(groupId, appId);
+if (apiResponse.status !== 200 && apiResponse.data) {
+    throw new HttpException(apiResponse.data, apiResponse.status);
+}
+return { result: apiResponse.data };
 ```
 
 With this client set up, you have the entire Atlas Admin API at your fingertips! For a detailed guide, check out the full [API Specification](https://gfay63.github.io/atlas-app-services-admin-api/).
