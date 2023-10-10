@@ -42,8 +42,10 @@ class ConsoleLogger {
 }
 
 const { AtlasAppServicesClient } = require('atlas-app-services-admin-api');
+
 // Setup optional logging
 const logger = new ConsoleLogger();
+
 // Setup your Atlas config per docs
 const configInfo = {
     publicKey: process.env.ATLAS_APP_SERVICES_PUBLIC_KEY,
@@ -51,14 +53,18 @@ const configInfo = {
     groupId: process.env.ATLAS_APP_SERVICES_GROUP_ID,
     baseUrl: process.env.ATLAS_APP_SERVICES_BASE_URL, // Optional Override
 };
+
 // Instantiate and initialize the client
 const atlasClient = new AtlasAppServicesClient(configInfo, logger);
 await atlasClient.initialize();
+
 // Instantiate the specific Atlas API you would like (see docs)
 const triggersApi = await atlasClient.atlasTriggersApi();
+
 // Snag Ids from client for the API calls as needed
 const groupId = atlasClient.groupId;
 const appId = atlasClient.appId;
+
 // Make the API call
 const apiResponse = await triggersApi.adminListTriggers(groupId, appId);
 if (apiResponse.status !== 200 && apiResponse.data) {
