@@ -1,5 +1,5 @@
 {
-  "name": "@gfay63/atlas-app-services-admin-api",
+  "name": "atlas-app-services-admin-api",
   "version": "1.5.2",
   "description": "OpenAPI client for Atlas App Services Admin API",
   "author": "Greg Fay + OpenAPI-Generator Contributors",
