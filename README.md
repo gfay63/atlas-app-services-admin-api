@@ -1,8 +1,27 @@
-# 🎉 Atlas App Services Admin API@3.0
+<h1 p align="center">
+🎉 Atlas App Services Admin API@3.0
+</h1>
 
-Welcome to the comprehensive interface for the [MongoDB Atlas App Services Admin API (3.0)](https://www.mongodb.com/docs/atlas/app-services/admin/api/v3/)!
 
-This package is derived directly from the official open API specification [here](blob:https://www.mongodb.com/78fd1eaa-8b75-4f59-b462-043187294fd5). It's been refactored and optimized to provide a seamless and efficient experience.
+
+<p align="center">
+    <a href="https://gfay63.github.io/atlas-app-services-admin-api/"><b>Documentation & API Specification</b></a> •
+    <a href="https://www.mongodb.com/docs/atlas/app-services/admin/api/v3/"><b>MongoDB API Reference</b></a>
+</p>
+
+<div align="center">
+
+[![npm version](https://img.shields.io/npm/v/atlas-app-services-admin-api.svg)](https://www.npmjs.com/package/atlas-app-services-admin-api)
+[![install size](https://img.shields.io/badge/dynamic/json?url=https://packagephobia.com/v2/api.json?p=atlas-app-services-admin-api&query=$.install.pretty&label=install%20size&style=flat-square)](https://packagephobia.now.sh/result?p=atlas-app-services-admin-api)
+[![npm downloads](https://img.shields.io/npm/dm/atlas-app-services-admin-api.svg?style=flat-square)](https://npm-stat.com/charts.html?package=atlas-app-services-admin-api)
+[![Known Vulnerabilities](https://snyk.io/test/npm/atlas-app-services-admin-api/badge.svg)](https://snyk.io/test/npm/atlas-app-services-admin-api)
+![GitHub top language](https://img.shields.io/github/languages/top/gfay63/atlas-app-services-admin-api)
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/gfay63)](https://github.com/sponsors/gfay63)
+</div>
+
+Welcome to the comprehensive interface for the `MongoDB Atlas App Services Admin API (3.0)`!
+
+This package is derived in part from the official [MongoDB Atlas Open API specification](https://www.mongodb.com/docs/atlas/app-services/admin/api/v3/). It's been refactored and optimized to provide a seamless and efficient experience.
 
 > 🚨 Disclaimer
 >
@@ -12,7 +31,7 @@ This package is derived directly from the official open API specification [here]
 
 - **Full Coverage**: This package offers complete access to the MongoDB Atlas App Services Admin API. No more partial implementations or missing features.
 - **Optimized for Use**: The refactoring ensures that accessing and using the API is as intuitive and straightforward as possible.
-- **Full documentation**: See [full documentation of the API Specification](https://gfay63.github.io/atlas-app-services-admin-api/).
+- **Full documentation**: See [full documentation with API Specification](https://gfay63.github.io/atlas-app-services-admin-api/).
 
 ## 🛠 Installation
 

@@ -2,10 +2,22 @@
   "name": "atlas-app-services-admin-api",
   "version": "1.5.2",
   "description": "OpenAPI client for Atlas App Services Admin API",
-  "author": "Greg Fay + OpenAPI-Generator Contributors",
+  "contributors": [
+    {
+      "name": "Greg Fay",
+      "url": "https://gregfay.com"
+    },
+    "OpenAPI-Generator Contributors"
+  ],
+  "homepage": "https://gfay63.github.io/atlas-app-services-admin-api/",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gfay63/atlas-app-services-admin-api.git"
+    "url": "https://github.com/gfay63/atlas-app-services-admin-api.git"
+  },
+  "bugs": "https://github.com/gfay63/atlas-app-services-admin-api/issues",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/gfay63"
   },
   "keywords": [
     "mongodb",
