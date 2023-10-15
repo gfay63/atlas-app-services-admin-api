@@ -1,6 +1,6 @@
 {
   "name": "atlas-app-services-admin-api",
-  "version": "1.5.3",
+  "version": "1.5.4",
   "description": "OpenAPI client for Atlas App Services Admin API",
   "contributors": [
     {
@@ -48,7 +48,7 @@
     "API Reference",
     "TypeDoc",
     "MIT License"
-],
+  ],
   "license": "MIT",
   "main": "./dist/index.js",
   "typings": "./dist/index.d.ts",
